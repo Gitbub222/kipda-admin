@@ -1,23 +1,31 @@
-// pages/login.js
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { Container, Paper, Typography, TextField, Button, Box, Link } from '@mui/material';
+import { Container, Paper, Typography, TextField, Button, Box, Alert } from '@mui/material';
 import { auth } from '../utils/firebase-config';
+import { getUserRole } from '../utils/firestore';
 
-
-export default function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+const Login: React.FC = () => {
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [error, setError] = useState<string>('');
     const router = useRouter();
 
-    const handleLogin = async (event: any) => {
+    const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setError('');
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            router.push('/'); // Redirect after login
-        } catch (error: any) {
-            console.error(error.message);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const uid = userCredential.user.uid;
+            const role = await getUserRole(uid);
+
+            if (role === 'admin') {
+                router.push('/');
+            } else {
+                setError('You need admin privileges to log in to the portal.');
+            }
+        } catch (error) {
+            setError('Email and password do not match. Please try again.');
         }
     };
 
@@ -25,20 +33,21 @@ export default function Login() {
         <Container component="main" maxWidth="xs">
             <Box
                 sx={{
-                    marginTop: 8,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                 }}
             >
                 <Paper elevation={3} sx={{ padding: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                    <img src="https://pbs.twimg.com/profile_images/1478379019515146240/nEIsqkvi_400x400.jpg" alt="Logo" style={{ width: '200px', height: '200px' }} />
                     <Typography component="h1" variant="h5" sx={{ margin: '16px 0' }}>
-                        Kipda Admin Portal
+                        KIPDA Notify Admin
                     </Typography>
                     <Typography variant="subtitle1" sx={{ margin: '8px 0' }}>
                         Sign in to access the admin dashboard.
                     </Typography>
-                    <Box component="form" noValidate sx={{ mt: 1 }}>
+                    {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
+                    <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleLogin}>
                         <TextField
                             margin="normal"
                             required
@@ -69,7 +78,6 @@ export default function Login() {
                             variant="contained"
                             sx={{ mt: 3, mb: 2, bgcolor: 'primary.main' }}
                             style={{ background: '#161b33', padding: '12px'}}
-                            onClick={handleLogin}
                         >
                             Sign in
                         </Button>
@@ -78,4 +86,6 @@ export default function Login() {
             </Box>
         </Container>
     );
-}
+};
+
+export default Login;

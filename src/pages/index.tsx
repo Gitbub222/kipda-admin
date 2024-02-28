@@ -115,7 +115,7 @@ export default function HomePage() {
                                     <TableCell component="th" scope="row" align="left">{notification.title}</TableCell>
                                     <TableCell align="left">{notification.message}</TableCell>
                                     <TableCell align="left">{notification.type}</TableCell>
-                                    <TableCell align="left" style={{ textAlign: "center" }}>
+                                    <TableCell align="left" style={{ textAlign: "left" }}>
                                         <span
                                             style={priorityStyle(notification.priority.toLowerCase())}>
                                             {notification.priority}

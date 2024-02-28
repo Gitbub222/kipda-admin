@@ -42,13 +42,13 @@ const CreateNotificationModal = ({ open, handleClose }: any) => {
 
     return (
         <Dialog open={open}>
-            <DialogTitle>Create New Notification</DialogTitle>
+            <DialogTitle>Send Notification</DialogTitle>
             <DialogContent>
                 <TextField
                     autoFocus
                     margin="dense"
                     name="title"
-                    label="title"
+                    label="Title"
                     type="text"
                     fullWidth
                     variant="outlined"
@@ -59,7 +59,7 @@ const CreateNotificationModal = ({ open, handleClose }: any) => {
                     autoFocus
                     margin="dense"
                     name="type"
-                    label="type"
+                    label="Type"
                     type="type"
                     fullWidth
                     variant="outlined"
@@ -85,7 +85,7 @@ const CreateNotificationModal = ({ open, handleClose }: any) => {
                 <TextField
                     margin="dense"
                     name="message"
-                    label="message"
+                    label="Message Preview"
                     type="text"
                     fullWidth
                     multiline
@@ -97,7 +97,7 @@ const CreateNotificationModal = ({ open, handleClose }: any) => {
                 <TextField
                     margin="dense"
                     name="detail"
-                    label="detail"
+                    label="Detailed Message"
                     type="text"
                     fullWidth
                     multiline
@@ -108,8 +108,8 @@ const CreateNotificationModal = ({ open, handleClose }: any) => {
                 />
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleClose} style={{ background: '#cf0420', color: '#fff', margin: '10px' }}>Cancel</Button>
-                <Button onClick={submitForm} style={{ background: '#161b33', color: '#fff', margin: '10px' }}>Submit</Button>
+                <Button onClick={handleClose} style={{ background: '#cf0420', color: '#fff', fontWeight: '700', margin: '10px', padding: '10px' }}>Discard</Button>
+                <Button onClick={submitForm} style={{ background: '#161b33', color: '#fff', fontWeight: '700', margin: '10px', padding: '10px'}}>Send</Button>
             </DialogActions>
         </Dialog>
     );

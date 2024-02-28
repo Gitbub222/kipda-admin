@@ -1,4 +1,3 @@
-// components/AppBar/index.jsx
 import React from 'react';
 import { styled } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
@@ -11,8 +10,8 @@ const drawerWidth = 240;
 
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean;
+    isAuthenticated?: boolean;
 }
-
 
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
@@ -31,7 +30,10 @@ const AppBar = styled(MuiAppBar, {
     }),
 }));
 
-const APPBAR = ({ open, handleDrawerOpen }: any) => (
+const APPBAR = ({ open, handleDrawerOpen, isAuthenticated }: any) => {
+  if (!isAuthenticated) return null;
+
+  return (
     <AppBar position="fixed" open={open} style={{ background: "#141829" }}>
         <Toolbar>
             <IconButton
@@ -48,7 +50,7 @@ const APPBAR = ({ open, handleDrawerOpen }: any) => (
             </Typography>
         </Toolbar>
     </AppBar>
-);
-
+  );
+};
 
 export default APPBAR;

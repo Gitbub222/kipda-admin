@@ -1,10 +1,10 @@
-// Import necessary modules from MUI and Next.js
 import Head from 'next/head';
 import { styled } from '@mui/material/styles';
 import { Box, CssBaseline } from '@mui/material';
-import { useState, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import APPBAR from './components/AppBar';
 import NavigationDrawer from './components/nav-drawer';
+import { auth } from './utils/firebase-config'; // Import Firebase auth instance
 
 const drawerWidth = 240;
 
@@ -33,9 +33,11 @@ interface RootLayoutProps {
   pageDescription?: string;
 }
 
-export default function RootLayout({ children, pageTitle = 'Your Site Title', pageDescription = 'Your site description' }: RootLayoutProps) {
+export default function RootLayout({ children, pageTitle = 'KIPDA Notify', pageDescription = 'Your site description' }: RootLayoutProps) {
   const [open, setOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // State to track authentication status
 
+  // Function to toggle drawer state
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -43,6 +45,19 @@ export default function RootLayout({ children, pageTitle = 'Your Site Title', pa
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  useEffect(() => {
+    // Check if a user is signed in
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setIsAuthenticated(true); // Set isAuthenticated to true if user is signed in
+      } else {
+        setIsAuthenticated(false); // Set isAuthenticated to false if no user is signed in
+      }
+    });
+
+    return () => unsubscribe(); // Unsubscribe from auth state changes when component unmounts
+  }, []);
 
   return (
     <>
@@ -55,9 +70,11 @@ export default function RootLayout({ children, pageTitle = 'Your Site Title', pa
       </Head>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <APPBAR open={open} handleDrawerOpen={handleDrawerOpen} />
+        <APPBAR open={open} handleDrawerOpen={handleDrawerOpen} isAuthenticated={isAuthenticated} />
         <NavigationDrawer open={open} handleDrawerOpen={handleDrawerOpen} handleDrawerClose={handleDrawerClose} />
-        <Main open={open} sx={{ marginTop: "32px", width: '100%', display: 'flex', justifyContent: "center" }}>{children}</Main>
+        <Main open={open} sx={{ marginTop: "32px", width: '100%', display: 'flex', justifyContent: "center" }}>
+          {children}
+        </Main>
       </Box>
     </>
   );
