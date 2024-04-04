@@ -1,36 +1,69 @@
-import React, { useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel, MenuItem, Select, TextField, Chip, OutlinedInput, SelectChangeEvent } from '@mui/material';
+import { collection, addDoc, serverTimestamp, FieldValue } from 'firebase/firestore';
 import { db } from '@/utils/firebase-config';
-import { NotificationFirebaseType } from '@/types/types';
 
-const CreateNotificationModal = ({ open, handleClose }: any) => {
-    const [newNotification, setNewNotification] = useState<NotificationFirebaseType>({
+interface NotificationType {
+    title: string;
+    message: string;
+    priority: string;
+    detail: string;
+    type: string;
+    date: FieldValue | null;
+    selectedCounties: string[];
+}
+
+const countyOptions = ['Jefferson', 'Bullitt', 'Shelby', 'Spencer', 'Oldham', 'Henry', 'Trimble'];
+const typeOptions = ['Weather', 'Service announcement', 'Closure', 'Event', 'Health'];
+const priorityOptions = ['Low', 'Medium', 'High'];
+
+interface Props {
+    open: boolean;
+    handleClose: () => void; // Assuming handleClose is a function that takes no arguments and returns void
+}
+
+const CreateNotificationModal: React.FC<Props> = ({ open, handleClose }) => {
+    const titleInputRef = useRef<HTMLInputElement>(null);
+
+useEffect(() => {
+  if (open) {
+    titleInputRef.current?.focus();
+  }
+}, [open]);
+
+    const [newNotification, setNewNotification] = useState<NotificationType>({
         title: '',
         message: '',
-        priority: '',
+        priority: 'Low', // Default priority
         detail: '',
-        type: '',
-        date: serverTimestamp(), // Use Firebase server timestamp
+        type: 'Weather', // Default type
+        date: null, // Adjusted to null for initial state
+        selectedCounties: [],
     });
 
-    const priorityOptions = ['Low', 'Medium', 'High'];
-    const [priorityType, setPriorityType] = React.useState<string>('Low');
+    const handleTypeChange = (event: SelectChangeEvent) => {
+        setNewNotification({ ...newNotification, type: event.target.value });
+    };
 
-    const handleDropdown = (event: SelectChangeEvent) => {
-        setPriorityType(event.target.value);
+    const handlePriorityChange = (event: SelectChangeEvent) => {
         setNewNotification({ ...newNotification, priority: event.target.value });
     };
 
-    const handleChange = (e: any) => {
-        setNewNotification({ ...newNotification, [e.target.name]: e.target.value });
+    const handleCountyChange = (event: SelectChangeEvent<typeof newNotification.selectedCounties>) => {
+        const value = event.target.value;
+        // On TypeScript, casting might be necessary here due to the multi-select returning a read-only array
+        setNewNotification({ ...newNotification, selectedCounties: typeof value === 'string' ? value.split(',') : value });
+    };
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setNewNotification({ ...newNotification, [event.target.name]: event.target.value });
     };
 
     const submitForm = async () => {
         try {
             await addDoc(collection(db, "notifications"), {
                 ...newNotification,
-                priority: priorityType, // Ensure priority is set from dropdown
+                date: serverTimestamp(), // Assign timestamp at submission time
             });
             console.log("Document successfully written!");
         } catch (e) {
@@ -39,13 +72,11 @@ const CreateNotificationModal = ({ open, handleClose }: any) => {
         handleClose();
     };
 
-
     return (
-        <Dialog open={open}>
+        <Dialog open={open} onClose={handleClose}>
             <DialogTitle>Send Notification</DialogTitle>
             <DialogContent>
                 <TextField
-                    autoFocus
                     margin="dense"
                     name="title"
                     label="Title"
@@ -54,32 +85,30 @@ const CreateNotificationModal = ({ open, handleClose }: any) => {
                     variant="outlined"
                     value={newNotification.title}
                     onChange={handleChange}
+                    inputRef={titleInputRef}
                 />
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    name="type"
-                    label="Type"
-                    type="type"
-                    fullWidth
-                    variant="outlined"
-                    value={newNotification.type}
-                    onChange={handleChange}
-                />
-                <InputLabel id="demo-select-small-label">Priority</InputLabel>
+                <InputLabel id="type-select-label">Type</InputLabel>
                 <Select
-                    labelId="demo-select-small-label"
-                    id="demo-select-small"
-                    value={priorityType}
-                    label="Priority"
-                    onChange={handleDropdown}
-                    defaultValue={"Low"}
-                    style={{ width: '100%' }}
+                    labelId="type-select-label"
+                    id="type-select"
+                    value={newNotification.type}
+                    onChange={handleTypeChange}
+                    fullWidth
                 >
-                    {priorityOptions.map((priority) => (
-                        <MenuItem key={priority} value={priority}>
-                            {priority}
-                        </MenuItem>
+                    {typeOptions.map(option => (
+                        <MenuItem key={option} value={option}>{option}</MenuItem>
+                    ))}
+                </Select>
+                <InputLabel id="priority-select-label">Priority</InputLabel>
+                <Select
+                    labelId="priority-select-label"
+                    id="priority-select"
+                    value={newNotification.priority}
+                    onChange={handlePriorityChange}
+                    fullWidth
+                >
+                    {priorityOptions.map(option => (
+                        <MenuItem key={option} value={option}>{option}</MenuItem>
                     ))}
                 </Select>
                 <TextField
@@ -106,10 +135,33 @@ const CreateNotificationModal = ({ open, handleClose }: any) => {
                     value={newNotification.detail}
                     onChange={handleChange}
                 />
+                <InputLabel id="county-select-label">Select Counties</InputLabel>
+                <Select
+                    labelId="county-select-label"
+                    id="county-select"
+                    multiple
+                    value={newNotification.selectedCounties}
+                    onChange={handleCountyChange}
+                    input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                    renderValue={(selected) => (
+                        <div>
+                            {selected.map((value) => (
+                                <Chip key={value} label={value} />
+                            ))}
+                        </div>
+                    )}
+                    fullWidth
+                >
+                    {countyOptions.map(name => (
+                        <MenuItem key={name} value={name}>
+                            {name}
+                        </MenuItem>
+                    ))}
+                </Select>
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleClose} style={{ background: '#cf0420', color: '#fff', fontWeight: '700', margin: '10px', padding: '10px' }}>Discard</Button>
-                <Button onClick={submitForm} style={{ background: '#161b33', color: '#fff', fontWeight: '700', margin: '10px', padding: '10px'}}>Send</Button>
+                <Button onClick={handleClose}>Cancel</Button>
+                <Button onClick={submitForm}>Submit</Button>
             </DialogActions>
         </Dialog>
     );
