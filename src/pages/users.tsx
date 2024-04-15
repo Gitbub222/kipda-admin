@@ -79,7 +79,7 @@ export default function Users() {
             setUsers(users);
         };
         fetchData();
-    }, []);
+    }, [user, loading, router, currentUser]);
 
 
     if (loading || !user) return <Box
@@ -102,7 +102,7 @@ export default function Users() {
                         open={modalOpen}
                         handleClose={handleCloseModal}
                         currentUser={currentUser}
-                        handleChange={handleChange}
+                        setCurrentUser={setCurrentUser}
                         handleUpdateUserDetails={handleUpdateUserDetails}
                         handleRemoveUser={handleRemoveUser}
                         handleResetPassword={handleResetPassword}

@@ -85,7 +85,7 @@ export default function NavigationDrawer({ open, handleDrawerOpen, handleDrawerC
                             <ListItemText primary={'Users'} style = {{color: 'white' }}/>
                         </ListItemButton>
                     </ListItem>
-                    <ListItem key={'settings'} disablePadding>
+                    {/* <ListItem key={'settings'} disablePadding>
                         <ListItemButton onClick={async () => { // Fix: Use arrow function syntax for onClick event handler
                             router.push('/settings');
                         }} style={{ margin: 0, padding: 20 }}>
@@ -94,7 +94,7 @@ export default function NavigationDrawer({ open, handleDrawerOpen, handleDrawerC
                             </ListItemIcon>
                             <ListItemText primary={'Settings'} style = {{color: 'white' }}/>
                         </ListItemButton>
-                    </ListItem>
+                    </ListItem> */}
                 </List>
             </Box>
             <List style={{margin:0, padding: 0, background: "#141829", display: 'flex', justifyContent: "center"}}>

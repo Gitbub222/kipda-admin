@@ -61,6 +61,15 @@ export default function HomePage() {
         setPage(0);
     };
 
+    const handleUpdateNotification = (updatedNotification: any) => {
+        const updatedNotifications = notifications.map((notification: any) => {
+            return notification.id === updatedNotification.id 
+                   ? updatedNotification 
+                   : notification;
+        });
+        setNotifications(updatedNotifications);
+    };
+
     const { user, loading } = useAuth();
     const router = useRouter();
 
@@ -139,6 +148,7 @@ export default function HomePage() {
                     notification={selectedNotification}
                     open={modalOpen}
                     handleClose={handleCloseModal}
+                    handleUpdateNotification={handleUpdateNotification}
                 />
 
                 <TablePagination
